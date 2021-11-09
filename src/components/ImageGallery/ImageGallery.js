@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import ImageGalleryItem from '../ImageGalleryItem';
 import s from './ImageGallery.module.css';
 
-function ImageGallery({ photos, onLargeImgOpen }) {
+function ImageGallery({ photos, onModalOpen }) {
     return (
         <ul className={s.gallery}>
             {photos.map(
@@ -16,7 +16,7 @@ function ImageGallery({ photos, onLargeImgOpen }) {
                         <ImageGalleryItem
                             src={src}
                             photoDescr={photoDescr}
-                            onLargeImgOpen={onLargeImgOpen}
+                            onModalOpen={onModalOpen}
                             largeImageUrl={largeImageUrl}
                         />
                     </li>

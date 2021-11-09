@@ -16,6 +16,14 @@ class App extends Component {
         largeImageUrl: '',
     };
 
+    componentDidUpdate(prevProps, prevState) {
+        const { isClickOnLoadMoreBtn } = this.state;
+
+        if (isClickOnLoadMoreBtn) {
+            scrollToNewImages();
+        }
+    }
+
     handleFormSubmit = async searchQuery => {
         try {
             this.setState({
@@ -26,12 +34,11 @@ class App extends Component {
             imagesApi.resetPage();
             const photos = await imagesApi.fetchWithQuery(searchQuery);
 
-            this.setState({
-                photos,
-                isLoaderVisible: false,
-            });
+            this.setState({ photos });
         } catch (error) {
             console.log(error);
+        } finally {
+            this.setState({ isLoaderVisible: false });
         }
     };
 
@@ -46,23 +53,20 @@ class App extends Component {
 
             this.setState(prevState => ({
                 photos: [...prevState.photos, ...photos],
-                isLoaderVisible: false,
             }));
         } catch (error) {
             console.log(error);
+        } finally {
+            this.setState({ isLoaderVisible: false });
         }
     };
 
-    componentDidUpdate(prevProps, prevState) {
-        const { isClickOnLoadMoreBtn } = this.state;
-
-        if (isClickOnLoadMoreBtn) {
-            scrollToNewImages();
-        }
-    }
-
-    handleLargeImgOpen = largeImageUrl =>
-        this.setState({ isModalOpen: true, largeImageUrl });
+    handleModalOpen = largeImageUrl =>
+        this.setState({
+            isModalOpen: true,
+            largeImageUrl,
+            isClickOnLoadMoreBtn: false,
+        });
 
     handleModalClose = () => this.setState({ isModalOpen: false });
 
@@ -75,7 +79,7 @@ class App extends Component {
                 <Searchbar onSubmit={this.handleFormSubmit} />
                 <ImageGallery
                     photos={photos}
-                    onLargeImgOpen={this.handleLargeImgOpen}
+                    onModalOpen={this.handleModalOpen}
                 />
                 {Boolean(photos.length) && !isLoaderVisible && (
                     <Button onClick={this.handleLoadMoreBtnClick} />
@@ -100,3 +104,14 @@ class App extends Component {
 }
 
 export default App;
+
+/**
+ * App
+ *   Searchbar
+ *     Form
+ *   ImageGallery
+ *     ImageGalleryItem
+ *   LoadMoreBtn
+ *   Loader
+ *   Modal
+ */

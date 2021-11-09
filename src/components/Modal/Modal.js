@@ -8,24 +8,31 @@ class Modal extends Component {
         onModalClose: PropTypes.func.isRequired,
     };
 
-    onEscPress = e => {
-        if (e.code !== 'Escape') return;
-        this.props.onModalClose();
-    };
-
     componentDidMount() {
-        window.addEventListener('keydown', this.onEscPress);
+        window.addEventListener('keydown', this.handleKeyDown);
     }
 
     componentWillUnmount() {
-        window.removeEventListener('keydown', this.onEscPress);
+        window.removeEventListener('keydown', this.handleKeyDown);
     }
 
+    handleKeyDown = e => {
+        if (e.code === 'Escape') {
+            this.props.onModalClose();
+        }
+    };
+
+    handleOverlayClick = ({ target, currentTarget }) => {
+        if (target === currentTarget) {
+            this.props.onModalClose();
+        }
+    };
+
     render() {
-        const { largeImageUrl, onModalClose } = this.props;
+        const { largeImageUrl } = this.props;
 
         return (
-            <div className={s.overlay} onClick={onModalClose}>
+            <div className={s.overlay} onClick={this.handleOverlayClick}>
                 <div className={s.modal}>
                     <img src={largeImageUrl} alt="" />
                 </div>
