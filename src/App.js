@@ -104,14 +104,3 @@ class App extends Component {
 }
 
 export default App;
-
-/**
- * App
- *   Searchbar
- *     Form
- *   ImageGallery
- *     ImageGalleryItem
- *   LoadMoreBtn
- *   Loader
- *   Modal
- */
