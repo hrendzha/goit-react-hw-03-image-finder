@@ -10,62 +10,58 @@ import scrollToNewImages from './js/scrollToNewImages';
 class App extends Component {
     state = {
         photos: [],
-        isClickOnLoadMoreBtn: false,
         isLoaderVisible: false,
         isModalOpen: false,
         largeImageUrl: '',
+        query: '',
+        page: 1,
     };
 
     componentDidUpdate(prevProps, prevState) {
-        const { isClickOnLoadMoreBtn } = this.state;
+        const { query: currentQuery, page: currentPage } = this.state;
+        const { query: prevQuery, page: prevPage } = prevState;
 
-        if (isClickOnLoadMoreBtn) {
-            scrollToNewImages();
+        if (currentQuery !== prevQuery) {
+            this.toggleLoader();
+
+            imagesApi
+                .fetchWithQuery(currentQuery, currentPage)
+                .then(photos => this.setState({ photos }))
+                .catch(error => console.log(error))
+                .finally(() => this.toggleLoader());
+        }
+
+        if (currentPage !== prevPage && currentPage !== 1) {
+            this.toggleLoader();
+
+            imagesApi
+                .fetchWithQuery(currentQuery, currentPage)
+                .then(photos => {
+                    this.setState(prevState => ({
+                        photos: [...prevState.photos, ...photos],
+                    }));
+
+                    scrollToNewImages();
+                })
+                .catch(error => console.log(error))
+                .finally(() => this.toggleLoader());
         }
     }
 
-    handleFormSubmit = async searchQuery => {
-        try {
-            this.setState({
-                isLoaderVisible: true,
-                isClickOnLoadMoreBtn: false,
-            });
+    toggleLoader = () =>
+        this.setState(prevState => ({
+            isLoaderVisible: !prevState.isLoaderVisible,
+        }));
 
-            imagesApi.resetPage();
-            const photos = await imagesApi.fetchWithQuery(searchQuery);
+    handleFormSubmit = query => this.setState({ query, page: 1 });
 
-            this.setState({ photos });
-        } catch (error) {
-            console.log(error);
-        } finally {
-            this.setState({ isLoaderVisible: false });
-        }
-    };
-
-    handleLoadMoreBtnClick = async () => {
-        try {
-            this.setState({
-                isLoaderVisible: true,
-                isClickOnLoadMoreBtn: true,
-            });
-
-            const photos = await imagesApi.fetchWithQuery();
-
-            this.setState(prevState => ({
-                photos: [...prevState.photos, ...photos],
-            }));
-        } catch (error) {
-            console.log(error);
-        } finally {
-            this.setState({ isLoaderVisible: false });
-        }
-    };
+    handleLoadMoreBtnClick = () =>
+        this.setState(prevState => ({ page: prevState.page + 1 }));
 
     handleModalOpen = largeImageUrl =>
         this.setState({
             isModalOpen: true,
             largeImageUrl,
-            isClickOnLoadMoreBtn: false,
         });
 
     handleModalClose = () => this.setState({ isModalOpen: false });
