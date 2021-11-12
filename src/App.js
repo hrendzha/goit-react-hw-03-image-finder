@@ -21,27 +21,21 @@ class App extends Component {
         const { query: currentQuery, page: currentPage } = this.state;
         const { query: prevQuery, page: prevPage } = prevState;
 
-        if (currentQuery !== prevQuery) {
-            this.toggleLoader();
-
-            imagesApi
-                .fetchWithQuery(currentQuery, currentPage)
-                .then(photos => this.setState({ photos }))
-                .catch(error => console.log(error))
-                .finally(() => this.toggleLoader());
-        }
-
-        if (currentPage !== prevPage && currentPage !== 1) {
+        if (currentQuery !== prevQuery || currentPage !== prevPage) {
             this.toggleLoader();
 
             imagesApi
                 .fetchWithQuery(currentQuery, currentPage)
                 .then(photos => {
-                    this.setState(prevState => ({
-                        photos: [...prevState.photos, ...photos],
-                    }));
+                    if (currentPage > 1) {
+                        this.setState(prevState => ({
+                            photos: [...prevState.photos, ...photos],
+                        }));
+                        scrollToNewImages();
+                        return;
+                    }
 
-                    scrollToNewImages();
+                    this.setState({ photos });
                 })
                 .catch(error => console.log(error))
                 .finally(() => this.toggleLoader());
